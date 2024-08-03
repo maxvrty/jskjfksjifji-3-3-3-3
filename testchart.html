@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <h1>WebSocket Example</h1>
+    <p>Контент страницы...</p>
+    <div id="messages"></div>
+    <div id="coefbar">0</div>
+    <div id="balance">0</div>
+
+    <script>
+        var ws = new WebSocket("ws://192.168.1.123/ws");
+
+        ws.onopen = function() {
+            console.log("Соединение установлено");
+            enterCite(1203658332);
+            
+        };
+
+        var candlecicle = 0; // инициализируем переменную с начальным значением 1
+
+        var maxkoef = 0;//in reconstu
+
+        let minValue = 0;//для поиска минимального
+
+
+
+        ws.onmessage = function(evt) {
+
+            let receivedData = evt.data.split(",");//разделитель в моем случае ','
+            let text = receivedData[1];//1 - [0], 2-[1]
+            messages.textContent = receivedData[0] + text;
+            console.log(receivedData[1])
+
+
+
+            if (receivedData[1] == "%") {
+            var candlenum = Math.floor(receivedData[0] / 50);
+
+            maxkoef = receivedData[0]//для сброса дальнейшего
+            
+            console.log(candlenum)
+
+
+
+            console.log(candlecicle)
+
+
+            var candles = document.getElementsByTagName('candle'); // получаем количество элементов с тегом div
+            console.log(candles.length)
+
+            if (candles.length >= candlenum) {
+            const candles = document.getElementsByTagName('candle');
+
+            // Определить последний элемент с тегом candle
+            let lastCandle;
+            for (let i = candles.length - 1; i >= 0; i--) {
+              if (candles[i].id === 'candle') {
+                lastCandle = candles[i];
+                break;
+              }
+            }
+
+            // Если найден последний элемент с тегом candle
+            if (lastCandle) {
+              resetheight = receivedData[0] - 50 * candlenum  
+              // Задать высоту последнему элементу
+              lastCandle.style.height = resetheight + 'px';
+            }
+            } else {
+              var newDiv = document.createElement('candle');
+              newDiv.id = 'candle';
+              newDiv.style.width = '10px';
+              newDiv.style.height = '50px';
+              newDiv.style.display = 'inline-block';
+              newDiv.style.backgroundColor = 'rgb(144, 255, 204';
+              newDiv.style.borderRadius = '2px';
+
+              if (candlecicle >= 1) {
+              topstep = candlecicle * 50
+              newDiv.style.margin = `0 10px ${topstep}px 0`;
+              if(candlecicle >= 1)//если текущий цикл равен = бару который должен создаватся
+              newDiv.style.height = '0px';
+              }else{
+              newDiv.style.margin = '0 10px 0 0';
+              }
+              document.body.appendChild(newDiv);
+              candlecicle++; // увеличиваем значение переменной на 1
+            }
+          }
+
+
+
+          if(receivedData[1] == 'time'){
+
+            if(receivedData[0] == 5){
+              var newDiv = document.createElement('candle');
+              newDiv.id = 'candle';
+              newDiv.style.width = '10px';
+              newDiv.style.height = maxkoef - 50 + "px";
+              newDiv.style.display = 'inline-block';
+              newDiv.style.backgroundColor = 'rgb(0, 0, 0';
+              newDiv.style.borderRadius = '2px';
+              newDiv.style.margin = `0 10px 0px  0`;
+              document.body.appendChild(newDiv);
+            }
+            if(receivedData[0] == 5){
+              var newDiv = document.createElement('candle');
+              newDiv.id = 'candle';
+              newDiv.style.width = '10px';
+              newDiv.style.height = -minValue + "px";
+              newDiv.style.display = 'inline-block';
+              newDiv.style.backgroundColor = 'rgb(0, 0, 0';
+              newDiv.style.borderRadius = '2px';
+              newDiv.style.margin = `0 10px 0px  0`;
+              newDiv.style.transform = `translateY(${-minValue}px)`;
+              document.body.appendChild(newDiv);
+            }
+
+            if(receivedData[0] == 2){
+            var elementsToRemove = document.querySelectorAll('#candle');
+              elementsToRemove.forEach(function(element) {
+              element.parentNode.removeChild(element);
+              }
+            );
+
+
+            var elementsToRemovepregame = document.querySelectorAll('#pregamecandel');
+              elementsToRemovepregame.forEach(function(element) {
+              element.parentNode.removeChild(element);
+              }
+            );
+            candlecicle = 0;
+            maxkoef = 0;
+            minValue = 0
+            }
+
+
+           }
+           
+            
+ 
+
+
+
+            if(receivedData[2] == "pregame"){
+
+
+              if (parseFloat(receivedData[1]) < parseFloat(minValue)) { //ищем минимальное
+                minValue = receivedData[1];
+                console.log(minValue + " minvalue")
+              }
+
+
+            var newDiv = document.createElement('div');
+             newDiv.style.width = '10px';
+             newDiv.id = 'pregamecandel';
+             newDiv.style.height = receivedData[1] + 'px';
+             newDiv.style.display = 'inline-block';
+             newDiv.style.backgroundColor = 'rgb(144, 255, 204';
+             newDiv.style.borderRadius = '2px';
+             if (receivedData[1] < 0) {
+            newDiv.style.height = -receivedData[1] + 'px';
+            newDiv.style.transform = `translateY(${-receivedData[1]}px)`;
+            newDiv.style.backgroundColor = 'rgb(0, 0, 0)';
+            }
+             newDiv.style.margin = '0 10px 0 0';
+            document.body.appendChild(newDiv);
+            }
+        };
+
+        ws.onclose = function() {
+            console.log("Соединение закрыто");
+            messages.textContent = "Соединение закрыто"
+        };
+    </script>
+
+
+
+
+
+
+
+<script>
+
+
+  async function enterCite(tg_id) {
+    try {
+      const response = await fetch('https://43df-89-22-177-227.ngrok-free.app/send_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({tg_id})
+      });
+
+      if (!response.ok) {
+        throw new Error('Сетевая ошибка при обращении к серверу');
+      }
+
+      const userData = await response.json();
+
+      var coefbar = document.getElementById("coefbar");
+      coefbar.textContent = userData.koefbar1 + "%  /" + userData.koefbar2 + "%  /" + userData.koefbar3 + "%  /" + userData.koefbar4 + "%";
+
+      for (var property in userData.pregame) { ///не работате переделать
+      var newParagraph = document.createElement('p');
+      newParagraph.textContent = property + ': ' + chart[property];
+       document.body.appendChild(newParagraph);
+      }
+
+      var balance = document.getElementById("balance");
+      balance.textContent = userData.balance;
+    } catch (error) {
+      console.error('Возникла ошибка:', error);
+    }
+  }
+
+
+</script>
+</body>
+</html>
